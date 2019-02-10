@@ -96,7 +96,6 @@ bool v8_dispose() {
  * @return {bool} always be true
  */
 bool v8_set_array_buffer_allocator() {
-  V8::SetArrayBufferAllocator(&ArrayBufferAllocator::the_singleton);
   return true;
 }
 
@@ -146,7 +145,10 @@ void v8_handle_scope(rust_callback callback) {
  * @return {void} doesn't return anything
  */
 void v8_isolate_new() {
-  isolate = Isolate::New();
+  Isolate::CreateParams create_params;
+  create_params.array_buffer_allocator =
+      v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+  isolate = Isolate::New(create_params);
 }
 
 /**
@@ -237,7 +239,10 @@ void v8_context_scope(rust_callback callback) {
  */
 Local<Script> v8_script_compile(char *data) {
   Local<String> source = String::NewFromUtf8(isolate, data);
-  Local<Script> script = Script::Compile(source);
+  Local<Script> script;
+  if (!Script::Compile(context, source).ToLocal(&script)) {
+      // TODO
+  }
   return script;
 }
 
@@ -252,7 +257,10 @@ Local<Script> v8_script_compile(char *data) {
 Local<Script> v8_script_compile_with_filename(char *data, char*path) {
   Local<String> source = String::NewFromUtf8(isolate, data);
   Local<String> filename = String::NewFromUtf8(isolate, path);
-  Local<Script> script = Script::Compile(source, filename);
+  Local<Script> script;
+  if (!Script::Compile(context, source).ToLocal(&script)) {
+      // TODO
+  }
   return script;
 }
 
@@ -263,10 +271,13 @@ Local<Script> v8_script_compile_with_filename(char *data, char*path) {
  * @return {Value} the result
  */
 Local<Value> v8_script_run(Script **script) {
-  TryCatch try_catch;
-  Local<Value> val = (*script)->Run();
+  TryCatch try_catch(isolate);
+  Local<Value> val;
+  if ((*script)->Run(context).ToLocal(&val)) {
+      // TODO
+  }
   if (try_catch.HasCaught()) {
-    String::Utf8Value msg(try_catch.Exception());
+    String::Utf8Value msg(isolate, try_catch.Exception());
     printf("%s\n", *msg);
   }
   return val;
@@ -324,7 +335,7 @@ bool v8_value_is_undefined(Value **val) {
  * @return {Number} the result
  */
 Local<Number> v8_value_to_number(Value **val) {
-  return (*val)->ToNumber();
+  return (*val)->ToNumber(context).ToLocalChecked();
 }
 
 /**
@@ -334,7 +345,7 @@ Local<Number> v8_value_to_number(Value **val) {
  * @return {Number} the result
  */
 Local<Integer> v8_value_to_integer(Value **val) {
-  return (*val)->ToInteger();
+  return (*val)->ToInteger(context).ToLocalChecked();
 }
 
 /**
@@ -344,7 +355,7 @@ Local<Integer> v8_value_to_integer(Value **val) {
  * @return {Boolean} the result
  */
 Local<Boolean> v8_value_to_boolean(Value **val) {
-  return (*val)->ToBoolean();
+  return (*val)->ToBoolean(context).ToLocalChecked();
 }
 
 /**
@@ -354,7 +365,7 @@ Local<Boolean> v8_value_to_boolean(Value **val) {
  * @return {String} the result
  */
 Local<String> v8_value_to_string(Value **val) {
-  return (*val)->ToString();
+  return (*val)->ToString(context).ToLocalChecked();
 }
 
 /**
@@ -364,7 +375,7 @@ Local<String> v8_value_to_string(Value **val) {
  * @return {Object} the result
  */
 Local<Object> v8_value_to_object(Value **val) {
-  return (*val)->ToObject();
+  return (*val)->ToObject(context).ToLocalChecked();
 }
 
 /**
@@ -374,7 +385,7 @@ Local<Object> v8_value_to_object(Value **val) {
  * @return {int32_t} the result
  */
 int32_t v8_value_as_int32(Value **val) {
-  return (*val)->Int32Value();
+  return (*val)->Int32Value(context).ToChecked();
 }
 
 /**
@@ -384,7 +395,7 @@ int32_t v8_value_as_int32(Value **val) {
  * @return {int64_t} the result
  */
 int64_t v8_value_as_int64(Value **val) {
-  return (*val)->IntegerValue();
+  return (*val)->IntegerValue(context).ToChecked();
 }
 
 /**
@@ -394,7 +405,7 @@ int64_t v8_value_as_int64(Value **val) {
  * @return {uint32_t} the result
  */
 uint32_t v8_value_as_uint32(Value **val) {
-  return (*val)->Uint32Value();
+  return (*val)->Uint32Value(context).ToChecked();
 }
 
 /**
@@ -429,7 +440,8 @@ Local<String> v8_string_empty(String **str) {
  * @return {char*}
  */
 char * v8_string_as_string(String **str) {
-  String::Utf8Value val((*str)->ToString());
+  Local<String> s = String::NewFromUtf8(isolate, "TODO");
+  String::Utf8Value val(isolate, s);
   return *val;
 }
 
@@ -547,7 +559,7 @@ bool v8_array_push(Array **arr, Local<Value> *val) {
   if (func->IsFunction()) {
     Local<Function> push = func.As<Function>();
     Local<Value> argv[1] = { *val };
-    push->Call((*arr)->ToObject(), 1, argv);
+    push->Call(context, (*arr)->ToObject(context).ToLocalChecked(), 1, argv);
     return true;
   } else {
     return false;
@@ -755,7 +767,7 @@ Local<FunctionTemplate> v8_function_tmpl_new_with_pointer_callback(FunctionCallb
  * @return {Function} the result
  */
 Local<Function> v8_function_tmpl_get_function(FunctionTemplate **ft) {
-  return (*ft)->GetFunction();
+  return (*ft)->GetFunction(context).ToLocalChecked();
 }
 
 /**
@@ -803,7 +815,7 @@ void v8_function_tmpl_set_property_method(FunctionTemplate **ft, char *name, Fun
  * @return {Object} the returned object
  */
 Local<Object> v8_function_tmpl_new_instance(FunctionTemplate **ft) {
-  return (*ft)->GetFunction()->NewInstance();
+  return (*ft)->GetFunction(context).ToLocalChecked()->NewInstance(context).ToLocalChecked();
 }
 
 /**
