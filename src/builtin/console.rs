@@ -19,12 +19,9 @@ extern "C" fn info(arguments: v8::FunctionCallbackInfo) {
     let firstArg = arguments.At(0);
     let msg: v8::String;
 
-    info!("{} {}", firstArg.IsString(), firstArg.IsFunction());
-
     if firstArg.IsString() || firstArg.IsFunction() {
         msg = firstArg.ToString();
     } else {
-        info!("stringify");
         msg = stringify(&firstArg);
     }
 
