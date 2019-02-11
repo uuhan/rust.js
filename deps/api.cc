@@ -10,32 +10,39 @@
 
 using namespace v8;
 
-class ArrayBufferAllocator : public ArrayBuffer::Allocator {
- public:
-  static ArrayBufferAllocator the_singleton;
-  virtual void* Allocate(size_t length);
-  virtual void* AllocateUninitialized(size_t length);
-  virtual void Free(void* data, size_t);
+class ArrayBufferAllocator : public ArrayBuffer::Allocator
+{
+public:
+    static ArrayBufferAllocator the_singleton;
+    virtual void *Allocate(size_t length);
+    virtual void *AllocateUninitialized(size_t length);
+    virtual void Free(void *data, size_t);
 };
 
 ArrayBufferAllocator ArrayBufferAllocator::the_singleton;
 
-void *ArrayBufferAllocator::Allocate(size_t length) {
-  void* data = AllocateUninitialized(length);
-  return data == NULL ? data : memset(data, 0, length);
+void *
+ArrayBufferAllocator::Allocate(size_t length)
+{
+    void *data = AllocateUninitialized(length);
+    return data == NULL ? data : memset(data, 0, length);
 }
 
-void* ArrayBufferAllocator::AllocateUninitialized(size_t length) {
-  return malloc(length);
+void *
+ArrayBufferAllocator::AllocateUninitialized(size_t length)
+{
+    return malloc(length);
 }
 
-void ArrayBufferAllocator::Free(void *data, size_t) {
-  free(data);
+void
+ArrayBufferAllocator::Free(void *data, size_t)
+{
+    free(data);
 }
 
 extern "C" {
 
-static Platform* default_platform;
+static Platform *default_platform;
 static ArrayBufferAllocator array_buffer_allocator;
 
 // The global isolate
@@ -53,10 +60,12 @@ Local<Context> context;
  * @method v8_free_platform()
  * @return {bool} always return true
  */
-bool v8_free_platform() {
-  delete default_platform;
-  default_platform = nullptr;
-  return true;
+bool
+v8_free_platform()
+{
+    delete default_platform;
+    default_platform = nullptr;
+    return true;
 }
 
 /**
@@ -64,12 +73,14 @@ bool v8_free_platform() {
  * @method v8_initialize_platform
  * @return {bool} always return true
  */
-bool v8_initialize_platform() {
-  if (default_platform == nullptr) {
-    default_platform = platform::CreateDefaultPlatform();
-    V8::InitializePlatform(default_platform);
-  }
-  return true;
+bool
+v8_initialize_platform()
+{
+    if (default_platform == nullptr) {
+        default_platform = platform::CreateDefaultPlatform();
+        V8::InitializePlatform(default_platform);
+    }
+    return true;
 }
 
 /**
@@ -77,8 +88,10 @@ bool v8_initialize_platform() {
  * @method v8_initialize
  * @return {bool} if there is some error during the process
  */
-bool v8_initialize() {
-  return V8::Initialize();
+bool
+v8_initialize()
+{
+    return V8::Initialize();
 }
 
 /**
@@ -86,8 +99,10 @@ bool v8_initialize() {
  * @method v8_dispose
  * @return {bool} if there is some error during the process
  */
-bool v8_dispose() {
-  return V8::Dispose();
+bool
+v8_dispose()
+{
+    return V8::Dispose();
 }
 
 /**
@@ -95,8 +110,10 @@ bool v8_dispose() {
  * @method v8_set_array_buffer_allocator
  * @return {bool} always be true
  */
-bool v8_set_array_buffer_allocator() {
-  return true;
+bool
+v8_set_array_buffer_allocator()
+{
+    return true;
 }
 
 /**
@@ -104,8 +121,10 @@ bool v8_set_array_buffer_allocator() {
  * @method v8_locker_is_locked
  * @return {bool} the result, true or false
  */
-bool v8_locker_is_locked() {
-  return Locker::IsLocked(isolate);
+bool
+v8_locker_is_locked()
+{
+    return Locker::IsLocked(isolate);
 }
 
 /**
@@ -113,8 +132,10 @@ bool v8_locker_is_locked() {
  * @method v8_locker_is_active
  * @return {bool} the result, true or false
  */
-bool v8_locker_is_active() {
-  return Locker::IsActive();
+bool
+v8_locker_is_active()
+{
+    return Locker::IsActive();
 }
 
 /**
@@ -123,9 +144,11 @@ bool v8_locker_is_active() {
  * @param {rust_callback} callback - The rust closure function
  * @return {void} doesn't return anything
  */
-void v8_locker(rust_callback callback) {
-  Locker locker(isolate);
-  callback();
+void
+v8_locker(rust_callback callback)
+{
+    Locker locker(isolate);
+    callback();
 }
 
 /**
@@ -134,9 +157,11 @@ void v8_locker(rust_callback callback) {
  * @param {rust_callback} callback - The rust closure function
  * @return {void} doesn't return anything
  */
-void v8_handle_scope(rust_callback callback) {
-  HandleScope handle_scope(isolate);
-  callback();
+void
+v8_handle_scope(rust_callback callback)
+{
+    HandleScope handle_scope(isolate);
+    callback();
 }
 
 /**
@@ -144,11 +169,13 @@ void v8_handle_scope(rust_callback callback) {
  * @method v8_isolate_new
  * @return {void} doesn't return anything
  */
-void v8_isolate_new() {
-  Isolate::CreateParams create_params;
-  create_params.array_buffer_allocator =
-      v8::ArrayBuffer::Allocator::NewDefaultAllocator();
-  isolate = Isolate::New(create_params);
+void
+v8_isolate_new()
+{
+    Isolate::CreateParams create_params;
+    create_params.array_buffer_allocator =
+        v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+    isolate = Isolate::New(create_params);
 }
 
 /**
@@ -156,9 +183,11 @@ void v8_isolate_new() {
  * @method v8_isolate_dispose
  * @return {void} doesn't return anything
  */
-void v8_isolate_dispose() {
-  isolate->Dispose();
-  isolate = nullptr;
+void
+v8_isolate_dispose()
+{
+    isolate->Dispose();
+    isolate = nullptr;
 }
 
 /**
@@ -166,8 +195,10 @@ void v8_isolate_dispose() {
  * @method v8_isolate_enter
  * @return {void} doesn't return anything
  */
-void v8_isolate_enter() {
-  isolate->Enter();
+void
+v8_isolate_enter()
+{
+    isolate->Enter();
 }
 
 /**
@@ -175,8 +206,10 @@ void v8_isolate_enter() {
  * @method v8_isolate_exit
  * @return {void} doesn't return anything
  */
-void v8_isolate_exit() {
-  isolate->Exit();
+void
+v8_isolate_exit()
+{
+    isolate->Exit();
 }
 
 /**
@@ -184,8 +217,10 @@ void v8_isolate_exit() {
  * @method v8_context_new
  * @return {void} doesn't return anything
  */
-void v8_context_new() {
-  context = Context::New(isolate);
+void
+v8_context_new()
+{
+    context = Context::New(isolate);
 }
 
 /**
@@ -193,8 +228,10 @@ void v8_context_new() {
  * @method v8_context_enter
  * @return {void} doesn't return anything
  */
-void v8_context_enter() {
-  context->Enter();
+void
+v8_context_enter()
+{
+    context->Enter();
 }
 
 /**
@@ -202,8 +239,10 @@ void v8_context_enter() {
  * @method v8_context_exit
  * @return {void} doesn't return anything
  */
-void v8_context_exit() {
-  context->Exit();
+void
+v8_context_exit()
+{
+    context->Exit();
 }
 
 /**
@@ -211,8 +250,10 @@ void v8_context_exit() {
  * @method v8_context_global
  * @return {Value} The global value
  */
-Local<Value> v8_context_global() {
-  return context->Global();
+Local<Value>
+v8_context_global()
+{
+    return context->Global();
 }
 
 /**
@@ -221,9 +262,11 @@ Local<Value> v8_context_global() {
  * @param {rust_callback} callback - The rust closure function
  * @return {void} doesn't return anything
  */
-void v8_context_scope(rust_callback callback) {
-  Context::Scope context_scope(context);
-  callback();
+void
+v8_context_scope(rust_callback callback)
+{
+    Context::Scope context_scope(context);
+    callback();
 }
 
 /**
@@ -237,31 +280,35 @@ void v8_context_scope(rust_callback callback) {
  * @param {char *} data - The source of script
  * @return {Script} the compiled script object
  */
-Local<Script> v8_script_compile(char *data) {
-  Local<String> source = String::NewFromUtf8(isolate, data);
-  Local<Script> script;
-  if (!Script::Compile(context, source).ToLocal(&script)) {
-      // TODO
-  }
-  return script;
+Local<Script>
+v8_script_compile(char *data)
+{
+    Local<String> source = String::NewFromUtf8(isolate, data);
+    Local<Script> script;
+    if (!Script::Compile(context, source).ToLocal(&script)) {
+        // TODO
+    }
+    return script;
 }
 
 /**
- * Compiles the specified script using the specified file 
- * name object (typically a string) as the script's origin. 
+ * Compiles the specified script using the specified file
+ * name object (typically a string) as the script's origin.
  * @method v8_script_compile_with_filename
  * @param {char *} data - The source of script
  * @param {char *} path - the file path
  * @return {Script} the compiled script object
  */
-Local<Script> v8_script_compile_with_filename(char *data, char*path) {
-  Local<String> source = String::NewFromUtf8(isolate, data);
-  Local<String> filename = String::NewFromUtf8(isolate, path);
-  Local<Script> script;
-  if (!Script::Compile(context, source).ToLocal(&script)) {
-      // TODO
-  }
-  return script;
+Local<Script>
+v8_script_compile_with_filename(char *data, char *path)
+{
+    Local<String> source = String::NewFromUtf8(isolate, data);
+    Local<String> filename = String::NewFromUtf8(isolate, path);
+    Local<Script> script;
+    if (!Script::Compile(context, source).ToLocal(&script)) {
+        // TODO
+    }
+    return script;
 }
 
 /**
@@ -270,17 +317,19 @@ Local<Script> v8_script_compile_with_filename(char *data, char*path) {
  * @param {Script} this
  * @return {Value} the result
  */
-Local<Value> v8_script_run(Script **script) {
-  TryCatch try_catch(isolate);
-  Local<Value> val;
-  if ((*script)->Run(context).ToLocal(&val)) {
-      // TODO
-  }
-  if (try_catch.HasCaught()) {
-    String::Utf8Value msg(isolate, try_catch.Exception());
-    printf("%s\n", *msg);
-  }
-  return val;
+Local<Value>
+v8_script_run(Script **script)
+{
+    TryCatch try_catch(isolate);
+    Local<Value> val;
+    if ((*script)->Run(context).ToLocal(&val)) {
+        // TODO
+    }
+    if (try_catch.HasCaught()) {
+        String::Utf8Value msg(isolate, try_catch.Exception());
+        printf("%s\n", *msg);
+    }
+    return val;
 }
 
 /**
@@ -289,8 +338,10 @@ Local<Value> v8_script_run(Script **script) {
  * @param {Script} this
  * @return {bool}
  */
-bool v8_script_is_empty(Local<Script> *script) {
-  return (*script).IsEmpty();
+bool
+v8_script_is_empty(Local<Script> *script)
+{
+    return (*script).IsEmpty();
 }
 
 /**
@@ -304,8 +355,10 @@ bool v8_script_is_empty(Local<Script> *script) {
  * @param {Value} this
  * @return {bool} the result
  */
-bool v8_value_is_string(Value **val) {
-  return (*val)->IsString();
+bool
+v8_value_is_string(Value **val)
+{
+    return (*val)->IsString();
 }
 
 /**
@@ -314,8 +367,10 @@ bool v8_value_is_string(Value **val) {
  * @param {Value} this
  * @return {bool} the result
  */
-bool v8_value_is_function(Value **val) {
-  return (*val)->IsFunction();
+bool
+v8_value_is_function(Value **val)
+{
+    return (*val)->IsFunction();
 }
 
 /**
@@ -324,8 +379,10 @@ bool v8_value_is_function(Value **val) {
  * @param {Value} this
  * @return {bool} the result
  */
-bool v8_value_is_undefined(Value **val) {
-  return (*val)->IsUndefined();
+bool
+v8_value_is_undefined(Value **val)
+{
+    return (*val)->IsUndefined();
 }
 
 /**
@@ -334,8 +391,10 @@ bool v8_value_is_undefined(Value **val) {
  * @param {Value} this
  * @return {Number} the result
  */
-Local<Number> v8_value_to_number(Value **val) {
-  return (*val)->ToNumber(context).ToLocalChecked();
+Local<Number>
+v8_value_to_number(Value **val)
+{
+    return (*val)->ToNumber(context).ToLocalChecked();
 }
 
 /**
@@ -344,8 +403,10 @@ Local<Number> v8_value_to_number(Value **val) {
  * @param {Value} this
  * @return {Number} the result
  */
-Local<Integer> v8_value_to_integer(Value **val) {
-  return (*val)->ToInteger(context).ToLocalChecked();
+Local<Integer>
+v8_value_to_integer(Value **val)
+{
+    return (*val)->ToInteger(context).ToLocalChecked();
 }
 
 /**
@@ -354,8 +415,10 @@ Local<Integer> v8_value_to_integer(Value **val) {
  * @param {Value} this
  * @return {Boolean} the result
  */
-Local<Boolean> v8_value_to_boolean(Value **val) {
-  return (*val)->ToBoolean(context).ToLocalChecked();
+Local<Boolean>
+v8_value_to_boolean(Value **val)
+{
+    return (*val)->ToBoolean(context).ToLocalChecked();
 }
 
 /**
@@ -364,8 +427,10 @@ Local<Boolean> v8_value_to_boolean(Value **val) {
  * @param {Value} this
  * @return {String} the result
  */
-Local<String> v8_value_to_string(Value **val) {
-  return (*val)->ToString(context).ToLocalChecked();
+Local<String>
+v8_value_to_string(Value **val)
+{
+    return (*val)->ToString(context).ToLocalChecked();
 }
 
 /**
@@ -374,8 +439,10 @@ Local<String> v8_value_to_string(Value **val) {
  * @param {Value} this
  * @return {Object} the result
  */
-Local<Object> v8_value_to_object(Value **val) {
-  return (*val)->ToObject(context).ToLocalChecked();
+Local<Object>
+v8_value_to_object(Value **val)
+{
+    return (*val)->ToObject(context).ToLocalChecked();
 }
 
 /**
@@ -384,8 +451,10 @@ Local<Object> v8_value_to_object(Value **val) {
  * @param {Value} this
  * @return {int32_t} the result
  */
-int32_t v8_value_as_int32(Value **val) {
-  return (*val)->Int32Value(context).ToChecked();
+int32_t
+v8_value_as_int32(Value **val)
+{
+    return (*val)->Int32Value(context).ToChecked();
 }
 
 /**
@@ -394,8 +463,10 @@ int32_t v8_value_as_int32(Value **val) {
  * @param {Value} this
  * @return {int64_t} the result
  */
-int64_t v8_value_as_int64(Value **val) {
-  return (*val)->IntegerValue(context).ToChecked();
+int64_t
+v8_value_as_int64(Value **val)
+{
+    return (*val)->IntegerValue(context).ToChecked();
 }
 
 /**
@@ -404,8 +475,10 @@ int64_t v8_value_as_int64(Value **val) {
  * @param {Value} this
  * @return {uint32_t} the result
  */
-uint32_t v8_value_as_uint32(Value **val) {
-  return (*val)->Uint32Value(context).ToChecked();
+uint32_t
+v8_value_as_uint32(Value **val)
+{
+    return (*val)->Uint32Value(context).ToChecked();
 }
 
 /**
@@ -419,8 +492,10 @@ uint32_t v8_value_as_uint32(Value **val) {
  * @param {char*} data
  * @return {String} the v8::String value
  */
-Local<String> v8_string_new_from_utf8(char *data) {
-  return String::NewFromUtf8(isolate, data);
+Local<String>
+v8_string_new_from_utf8(char *data)
+{
+    return String::NewFromUtf8(isolate, data);
 }
 
 /**
@@ -429,8 +504,10 @@ Local<String> v8_string_new_from_utf8(char *data) {
  * @param {String} this
  * @return {String}
  */
-Local<String> v8_string_empty(String **str) {
-  return (*str)->Empty(isolate);
+Local<String>
+v8_string_empty(String **str)
+{
+    return (*str)->Empty(isolate);
 }
 
 /**
@@ -439,10 +516,12 @@ Local<String> v8_string_empty(String **str) {
  * @param {String} this
  * @return {char*}
  */
-char * v8_string_as_string(String **str) {
-  Local<String> s = String::NewFromUtf8(isolate, "TODO");
-  String::Utf8Value val(isolate, s);
-  return *val;
+char *
+v8_string_as_string(String **str)
+{
+    Local<String> s = String::NewFromUtf8(isolate, "TODO");
+    String::Utf8Value val(isolate, s);
+    return *val;
 }
 
 /**
@@ -450,28 +529,40 @@ char * v8_string_as_string(String **str) {
  * @class Number
  */
 
-Local<Number> v8_number_new_from_u16(uint16_t n) {
-  return Number::New(isolate, n);
+Local<Number>
+v8_number_new_from_u16(uint16_t n)
+{
+    return Number::New(isolate, n);
 }
 
-Local<Number> v8_number_new_from_u32(uint32_t n) {
-  return Number::New(isolate, n);
+Local<Number>
+v8_number_new_from_u32(uint32_t n)
+{
+    return Number::New(isolate, n);
 }
 
-Local<Number> v8_number_new_from_u64(uint64_t n) {
-  return Number::New(isolate, n);
+Local<Number>
+v8_number_new_from_u64(uint64_t n)
+{
+    return Number::New(isolate, n);
 }
 
-Local<Number> v8_number_new_from_i16(int16_t n) {
-  return Number::New(isolate, n);
+Local<Number>
+v8_number_new_from_i16(int16_t n)
+{
+    return Number::New(isolate, n);
 }
 
-Local<Number> v8_number_new_from_i32(int32_t n) {
-  return Number::New(isolate, n);
+Local<Number>
+v8_number_new_from_i32(int32_t n)
+{
+    return Number::New(isolate, n);
 }
 
-Local<Number> v8_number_new_from_i64(int64_t n) {
-  return Number::New(isolate, n);
+Local<Number>
+v8_number_new_from_i64(int64_t n)
+{
+    return Number::New(isolate, n);
 }
 
 /**
@@ -479,16 +570,20 @@ Local<Number> v8_number_new_from_i64(int64_t n) {
  * @class Integer
  */
 
-Local<Boolean> v8_boolean_new(bool val) {
-  return Boolean::New(isolate, val);
+Local<Boolean>
+v8_boolean_new(bool val)
+{
+    return Boolean::New(isolate, val);
 }
 
 /**
  * The Boolean class
  * @class Boolean
  */
-bool v8_boolean_value(Boolean **val) {
-  return (*val)->Value();
+bool
+v8_boolean_value(Boolean **val)
+{
+    return (*val)->Value();
 }
 
 /**
@@ -501,8 +596,10 @@ bool v8_boolean_value(Boolean **val) {
  * @method v8_object_new
  * @return {Object} the returned object
  */
-Local<Object> v8_object_new() {
-  return Object::New(isolate);
+Local<Object>
+v8_object_new()
+{
+    return Object::New(isolate);
 }
 
 /**
@@ -510,8 +607,10 @@ Local<Object> v8_object_new() {
  * @method v8_object_get_isolate
  * @return {Object} the returned isolate
  */
-Isolate* v8_object_get_isolate(Object **object) {
-  return (*object)->GetIsolate();
+Isolate *
+v8_object_get_isolate(Object **object)
+{
+    return (*object)->GetIsolate();
 }
 
 /**
@@ -521,8 +620,10 @@ Isolate* v8_object_get_isolate(Object **object) {
  * @param {Value} key
  * @return {Value} The value
  */
-Local<Value> v8_object_get(Object **object, Local<Value> *key) {
-  return (*object)->Get(*key);
+Local<Value>
+v8_object_get(Object **object, Local<Value> *key)
+{
+    return (*object)->Get(*key);
 }
 
 /**
@@ -533,37 +634,48 @@ Local<Value> v8_object_get(Object **object, Local<Value> *key) {
  * @param {Value} val
  * @return {bool}
  */
-bool v8_object_set(Object **object, Local<Value> *key, Local<Value> *val) {
-  return (*object)->Set(*key, *val);
+bool
+v8_object_set(Object **object, Local<Value> *key, Local<Value> *val)
+{
+    return (*object)->Set(*key, *val);
 }
 
 /**
  * The Array class
  * @class Array
  */
-Local<Array> v8_array_new() {
-  return Array::New(isolate);
+Local<Array>
+v8_array_new()
+{
+    return Array::New(isolate);
 }
 
-Local<Value> v8_array_get(Array **arr, Local<Value> *key) {
-  return (*arr)->Get(*key);
+Local<Value>
+v8_array_get(Array **arr, Local<Value> *key)
+{
+    return (*arr)->Get(*key);
 }
 
-bool v8_array_set(Array **arr, Local<Value> *key, Local<Value> *val) {
-  return (*arr)->Set(*key, *val);
+bool
+v8_array_set(Array **arr, Local<Value> *key, Local<Value> *val)
+{
+    return (*arr)->Set(*key, *val);
 }
 
-bool v8_array_push(Array **arr, Local<Value> *val) {
-  Local<String> key = String::NewFromUtf8(isolate, "push");
-  Local<Value> func = (*arr)->Get(key);
-  if (func->IsFunction()) {
-    Local<Function> push = func.As<Function>();
-    Local<Value> argv[1] = { *val };
-    push->Call(context, (*arr)->ToObject(context).ToLocalChecked(), 1, argv);
-    return true;
-  } else {
-    return false;
-  }
+bool
+v8_array_push(Array **arr, Local<Value> *val)
+{
+    Local<String> key = String::NewFromUtf8(isolate, "push");
+    Local<Value> func = (*arr)->Get(key);
+    if (func->IsFunction()) {
+        Local<Function> push = func.As<Function>();
+        Local<Value> argv[1] = {*val};
+        push->Call(context, (*arr)->ToObject(context).ToLocalChecked(), 1,
+                   argv);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /**
@@ -571,8 +683,10 @@ bool v8_array_push(Array **arr, Local<Value> *val) {
  * @class Function
  */
 
-Local<Function> v8_function_cast(Local<Value> *fval) {
-  return Local<Function>::Cast(*fval);
+Local<Function>
+v8_function_cast(Local<Value> *fval)
+{
+    return Local<Function>::Cast(*fval);
 }
 
 /**
@@ -584,12 +698,15 @@ Local<Function> v8_function_cast(Local<Value> *fval) {
  * @param {Int} argc - the count of argv
  * @return {Value} the result
  */
-Local<Value> v8_function_call(Function **func, Local<Value> global, Local<Value> **argv, uint32_t argc) {
-  Local<Value> *args = new Local<Value>[argc];
-  for (int32_t i = 0; i < argc; i++) {
-    args[i] = *argv[i];
-  }
-  return (*func)->Call(global, argc, args);
+Local<Value>
+v8_function_call(Function **func, Local<Value> global, Local<Value> **argv,
+                 uint32_t argc)
+{
+    Local<Value> *args = new Local<Value>[argc];
+    for (int32_t i = 0; i < argc; i++) {
+        args[i] = *argv[i];
+    }
+    return (*func)->Call(global, argc, args);
 }
 
 /**
@@ -603,8 +720,10 @@ Local<Value> v8_function_call(Function **func, Local<Value> global, Local<Value>
  * @param {FunctionCallbackInfo} callbackInfo
  * @return {int} the result
  */
-int v8_function_callback_info_length(FunctionCallbackInfo<Value> **callbackInfo) {
-  return (*callbackInfo)->Length();
+int
+v8_function_callback_info_length(FunctionCallbackInfo<Value> **callbackInfo)
+{
+    return (*callbackInfo)->Length();
 }
 
 /**
@@ -614,8 +733,11 @@ int v8_function_callback_info_length(FunctionCallbackInfo<Value> **callbackInfo)
  * @param {int} index
  * @return {Value} the result
  */
-Local<Value> v8_function_callback_info_at(FunctionCallbackInfo<Value> **callbackInfo, int index) {
-  return (**callbackInfo)[index];
+Local<Value>
+v8_function_callback_info_at(FunctionCallbackInfo<Value> **callbackInfo,
+                             int index)
+{
+    return (**callbackInfo)[index];
 }
 
 /**
@@ -624,8 +746,10 @@ Local<Value> v8_function_callback_info_at(FunctionCallbackInfo<Value> **callback
  * @param {FunctionCallbackInfo} callbackInfo
  * @return {Value} the result
  */
-Local<Object> v8_function_callback_info_this(FunctionCallbackInfo<Value> **callbackInfo) {
-  return (*callbackInfo)->This();
+Local<Object>
+v8_function_callback_info_this(FunctionCallbackInfo<Value> **callbackInfo)
+{
+    return (*callbackInfo)->This();
 }
 
 /**
@@ -634,8 +758,10 @@ Local<Object> v8_function_callback_info_this(FunctionCallbackInfo<Value> **callb
  * @param {FunctionCallbackInfo} callbackInfo
  * @return {Value} the result
  */
-Local<Object> v8_function_callback_info_holder(FunctionCallbackInfo<Value> **callbackInfo) {
-  return (*callbackInfo)->Holder();
+Local<Object>
+v8_function_callback_info_holder(FunctionCallbackInfo<Value> **callbackInfo)
+{
+    return (*callbackInfo)->Holder();
 }
 
 /**
@@ -644,8 +770,11 @@ Local<Object> v8_function_callback_info_holder(FunctionCallbackInfo<Value> **cal
  * @param {FunctionCallbackInfo} callbackInfo
  * @return {ReturnValue} the result
  */
-ReturnValue<Value> v8_function_callback_info_get_return_value(FunctionCallbackInfo<Value> **callbackInfo) {
-  return (*callbackInfo)->GetReturnValue();
+ReturnValue<Value>
+v8_function_callback_info_get_return_value(
+    FunctionCallbackInfo<Value> **callbackInfo)
+{
+    return (*callbackInfo)->GetReturnValue();
 }
 
 /**
@@ -654,8 +783,11 @@ ReturnValue<Value> v8_function_callback_info_get_return_value(FunctionCallbackIn
  * @param {FunctionCallbackInfo} callbackInfo
  * @return {Boolean} the result
  */
-bool v8_function_callback_info_is_constructcall(FunctionCallbackInfo<Value> **callbackInfo) {
-  return (*callbackInfo)->IsConstructCall();
+bool
+v8_function_callback_info_is_constructcall(
+    FunctionCallbackInfo<Value> **callbackInfo)
+{
+    return (*callbackInfo)->IsConstructCall();
 }
 
 /**
@@ -669,8 +801,10 @@ bool v8_function_callback_info_is_constructcall(FunctionCallbackInfo<Value> **ca
  * @param {ReturnValue} retval
  * @param {Value} handle
  */
-void v8_return_value_set(ReturnValue<Value> *retval, Local<Value> *val) {
-  return retval->Set(*val);
+void
+v8_return_value_set(ReturnValue<Value> *retval, Local<Value> *val)
+{
+    return retval->Set(*val);
 }
 
 /**
@@ -679,8 +813,10 @@ void v8_return_value_set(ReturnValue<Value> *retval, Local<Value> *val) {
  * @param {ReturnValue} retval
  * @param {bool} val
  */
-void v8_return_value_set_bool(ReturnValue<Value> *retval, bool val) {
-  return retval->Set(val);
+void
+v8_return_value_set_bool(ReturnValue<Value> *retval, bool val)
+{
+    return retval->Set(val);
 }
 
 /**
@@ -689,8 +825,10 @@ void v8_return_value_set_bool(ReturnValue<Value> *retval, bool val) {
  * @param {ReturnValue} retval
  * @param {bool} val
  */
-void v8_return_value_set_int32(ReturnValue<Value> *retval, int32_t val) {
-  return retval->Set(val);
+void
+v8_return_value_set_int32(ReturnValue<Value> *retval, int32_t val)
+{
+    return retval->Set(val);
 }
 
 /**
@@ -699,8 +837,10 @@ void v8_return_value_set_int32(ReturnValue<Value> *retval, int32_t val) {
  * @param {ReturnValue} retval
  * @param {bool} val
  */
-void v8_return_value_set_uint32(ReturnValue<Value> *retval, uint32_t val) {
-  return retval->Set(val);
+void
+v8_return_value_set_uint32(ReturnValue<Value> *retval, uint32_t val)
+{
+    return retval->Set(val);
 }
 
 /**
@@ -708,8 +848,10 @@ void v8_return_value_set_uint32(ReturnValue<Value> *retval, uint32_t val) {
  * @method v8_return_value_set_null
  * @param {ReturnValue} retval
  */
-void v8_return_value_set_null(ReturnValue<Value> *retval) {
-  return retval->SetNull();
+void
+v8_return_value_set_null(ReturnValue<Value> *retval)
+{
+    return retval->SetNull();
 }
 
 /**
@@ -717,8 +859,10 @@ void v8_return_value_set_null(ReturnValue<Value> *retval) {
  * @method v8_return_value_set_null
  * @param {ReturnValue} retval
  */
-void v8_return_value_set_undefined(ReturnValue<Value> *retval) {
-  return retval->SetUndefined();
+void
+v8_return_value_set_undefined(ReturnValue<Value> *retval)
+{
+    return retval->SetUndefined();
 }
 
 /**
@@ -726,8 +870,10 @@ void v8_return_value_set_undefined(ReturnValue<Value> *retval) {
  * @method v8_return_value_set_null
  * @param {ReturnValue} retval
  */
-void v8_return_value_set_empty_string(ReturnValue<Value> *retval) {
-  return retval->SetEmptyString();
+void
+v8_return_value_set_empty_string(ReturnValue<Value> *retval)
+{
+    return retval->SetEmptyString();
 }
 
 /**
@@ -741,8 +887,10 @@ void v8_return_value_set_empty_string(ReturnValue<Value> *retval) {
  * @constructor
  * @return {FunctionTemplate} new instance
  */
-Local<FunctionTemplate> v8_function_tmpl_new() {
-  return FunctionTemplate::New(isolate);
+Local<FunctionTemplate>
+v8_function_tmpl_new()
+{
+    return FunctionTemplate::New(isolate);
 }
 
 /**
@@ -752,12 +900,16 @@ Local<FunctionTemplate> v8_function_tmpl_new() {
  * @param {FunctionCallback} callback
  * @return {FunctionTemplate} new instance
  */
-Local<FunctionTemplate> v8_function_tmpl_new_with_callback(FunctionCallback *callback) {
-  return FunctionTemplate::New(isolate, *callback);
+Local<FunctionTemplate>
+v8_function_tmpl_new_with_callback(FunctionCallback *callback)
+{
+    return FunctionTemplate::New(isolate, *callback);
 }
 
-Local<FunctionTemplate> v8_function_tmpl_new_with_pointer_callback(FunctionCallback *callback) {
-  return FunctionTemplate::New(isolate, *callback);
+Local<FunctionTemplate>
+v8_function_tmpl_new_with_pointer_callback(FunctionCallback *callback)
+{
+    return FunctionTemplate::New(isolate, *callback);
 }
 
 /**
@@ -766,8 +918,10 @@ Local<FunctionTemplate> v8_function_tmpl_new_with_pointer_callback(FunctionCallb
  * @param {FunctionTemplate} this
  * @return {Function} the result
  */
-Local<Function> v8_function_tmpl_get_function(FunctionTemplate **ft) {
-  return (*ft)->GetFunction(context).ToLocalChecked();
+Local<Function>
+v8_function_tmpl_get_function(FunctionTemplate **ft)
+{
+    return (*ft)->GetFunction(context).ToLocalChecked();
 }
 
 /**
@@ -777,8 +931,10 @@ Local<Function> v8_function_tmpl_get_function(FunctionTemplate **ft) {
  * @param {char*} the class name
  * @return {void}
  */
-void v8_function_tmpl_set_class_name(FunctionTemplate **ft, char *name) {
-  (*ft)->SetClassName(String::NewFromUtf8(isolate, name));
+void
+v8_function_tmpl_set_class_name(FunctionTemplate **ft, char *name)
+{
+    (*ft)->SetClassName(String::NewFromUtf8(isolate, name));
 }
 
 /**
@@ -788,8 +944,11 @@ void v8_function_tmpl_set_class_name(FunctionTemplate **ft, char *name) {
  * @param {uint32_t} fieldCount
  * @return {void}
  */
-void v8_function_tmpl_set_internal_fieldcount(FunctionTemplate **ft, uint32_t fieldCount) {
-  (*ft)->InstanceTemplate()->SetInternalFieldCount(fieldCount);
+void
+v8_function_tmpl_set_internal_fieldcount(FunctionTemplate **ft,
+                                         uint32_t fieldCount)
+{
+    (*ft)->InstanceTemplate()->SetInternalFieldCount(fieldCount);
 }
 
 /**
@@ -800,12 +959,16 @@ void v8_function_tmpl_set_internal_fieldcount(FunctionTemplate **ft, uint32_t fi
  * @param {FunctionCallback*} method
  * @return {void}
  */
-void v8_function_tmpl_set_property_method(FunctionTemplate **ft, char *name, FunctionCallback *method) {
-  v8::Isolate* isolate = v8::Isolate::GetCurrent();
-  v8::Local<v8::FunctionTemplate> t = v8::FunctionTemplate::New(isolate, *method);
-  v8::Local<v8::String> fn_name = v8::String::NewFromUtf8(isolate, name);
-  t->SetClassName(fn_name);
-  (*ft)->PrototypeTemplate()->Set(fn_name, t);
+void
+v8_function_tmpl_set_property_method(FunctionTemplate **ft, char *name,
+                                     FunctionCallback *method)
+{
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::Local<v8::FunctionTemplate> t =
+        v8::FunctionTemplate::New(isolate, *method);
+    v8::Local<v8::String> fn_name = v8::String::NewFromUtf8(isolate, name);
+    t->SetClassName(fn_name);
+    (*ft)->PrototypeTemplate()->Set(fn_name, t);
 }
 
 /**
@@ -814,8 +977,14 @@ void v8_function_tmpl_set_property_method(FunctionTemplate **ft, char *name, Fun
  * @param {FunctionTemplate} this
  * @return {Object} the returned object
  */
-Local<Object> v8_function_tmpl_new_instance(FunctionTemplate **ft) {
-  return (*ft)->GetFunction(context).ToLocalChecked()->NewInstance(context).ToLocalChecked();
+Local<Object>
+v8_function_tmpl_new_instance(FunctionTemplate **ft)
+{
+    return (*ft)
+        ->GetFunction(context)
+        .ToLocalChecked()
+        ->NewInstance(context)
+        .ToLocalChecked();
 }
 
 /**
@@ -826,59 +995,68 @@ Local<Object> v8_function_tmpl_new_instance(FunctionTemplate **ft) {
  * create an exception
  * @method v8_exception_throw_error
  */
-Local<Value> v8_exception_throw_error(char *msg) {
-  auto ret = Exception::Error(String::NewFromUtf8(isolate, msg));
-  return isolate->ThrowException(ret);
+Local<Value>
+v8_exception_throw_error(char *msg)
+{
+    auto ret = Exception::Error(String::NewFromUtf8(isolate, msg));
+    return isolate->ThrowException(ret);
 }
 
 /**
  * create an exception for range
  * @method v8_exception_throw_range_error
  */
-Local<Value> v8_exception_throw_range_error(char *msg) {
-  auto ret = Exception::RangeError(String::NewFromUtf8(isolate, msg));
-  return isolate->ThrowException(ret);
+Local<Value>
+v8_exception_throw_range_error(char *msg)
+{
+    auto ret = Exception::RangeError(String::NewFromUtf8(isolate, msg));
+    return isolate->ThrowException(ret);
 }
 
 /**
  * create an exception for reference
  * @method v8_exception_throw_reference_error
  */
-Local<Value> v8_exception_throw_reference_error(char *msg) {
-  auto ret = Exception::ReferenceError(String::NewFromUtf8(isolate, msg));
-  return isolate->ThrowException(ret);
+Local<Value>
+v8_exception_throw_reference_error(char *msg)
+{
+    auto ret = Exception::ReferenceError(String::NewFromUtf8(isolate, msg));
+    return isolate->ThrowException(ret);
 }
 
 /**
  * throws an exception for syntax error
  * @method v8_exception_throw_syntax_error
  */
-Local<Value> v8_exception_throw_syntax_error(char *msg) {
-  auto ret = Exception::SyntaxError(String::NewFromUtf8(isolate, msg));
-  return isolate->ThrowException(ret);
+Local<Value>
+v8_exception_throw_syntax_error(char *msg)
+{
+    auto ret = Exception::SyntaxError(String::NewFromUtf8(isolate, msg));
+    return isolate->ThrowException(ret);
 }
 
 /**
  * create an exception for type errors
  * @method v8_exception_throw_type_error
  */
-Local<Value> v8_exception_throw_type_error(char *msg) {
-  auto ret = Exception::TypeError(String::NewFromUtf8(isolate, msg));
-  return isolate->ThrowException(ret);
+Local<Value>
+v8_exception_throw_type_error(char *msg)
+{
+    auto ret = Exception::TypeError(String::NewFromUtf8(isolate, msg));
+    return isolate->ThrowException(ret);
 }
 
 /**
  * utilities
  */
 
-bool utils_is_big_endian() {
-  const union {
-    uint8_t u8[2];
-    uint16_t u16;
-  } u = {
-    { 1, 0 }
-  };
-  return u.u16 == 1 ? false : true;
+bool
+utils_is_big_endian()
+{
+    const union {
+        uint8_t u8[2];
+        uint16_t u16;
+    } u = {{1, 0}};
+    return u.u16 == 1 ? false : true;
 }
-
 }

@@ -9,20 +9,26 @@ extern crate url;
 pub mod util;
 pub mod builtin;
 
+#[macro_use]
+extern crate log;
+
 use util::cmd::Commander;
 use util::v8;
 
 pub fn new_instance() -> i32 {
+    info!("new_instance");
     extern "C" fn on_locked() {
         v8::with_isolate_scope(&|| {
             v8::with_handle_scope(on_handle_scoped);
         });
     }
     extern "C" fn on_handle_scoped() {
+        info!("on_handle_scoped");
         v8::Context::New();
         v8::with_context_scope(on_context_scoped);
     }
     extern "C" fn on_context_scoped() {
+        info!("on_context_scoped");
         let global = v8::Context::Global();
         let modules = v8::Object::New();
 
@@ -75,13 +81,21 @@ pub fn new_instance() -> i32 {
     }
 
     let code: i32 = 1;
+    info!("new_instance");
     v8::V8::InitializePlatform();
+    info!("new_instance");
     v8::V8::Initialize();
+    info!("new_instance");
     v8::V8::SetArrayBufferAllocator();
+    info!("new_instance");
     v8::V8::NewIsolate();
+    info!("new_instance");
     v8::with_locker(on_locked);
+    info!("new_instance");
     v8::V8::DisposeIsolate();
+    info!("new_instance");
     v8::V8::Dispose();
+    info!("new_instance");
     v8::V8::UnInitializePlatform();
     return code;
 }
