@@ -13,6 +13,5 @@ fn main() {
         .default_format_module_path(true)
         .init();
 
-    info!(">");
     rustjs::new_instance();
 }
