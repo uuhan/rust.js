@@ -505,9 +505,9 @@ v8_string_new_from_utf8(char *data)
  * @return {String}
  */
 Local<String>
-v8_string_empty(String **str)
+v8_string_empty(String *str)
 {
-    return (*str)->Empty(isolate);
+    return str->Empty(isolate);
 }
 
 /**
@@ -517,10 +517,10 @@ v8_string_empty(String **str)
  * @return {char*}
  */
 char *
-v8_string_as_string(String **str)
+v8_string_as_string(Local<String> *str)
 {
-    Local<String> s = String::NewFromUtf8(isolate, "TODO");
-    String::Utf8Value val(isolate, s);
+    // Local<String> s = reinterpret_cast<Local<String>&>(str);
+    String::Utf8Value val(isolate, *str);
     return *val;
 }
 
