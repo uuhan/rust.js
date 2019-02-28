@@ -15,6 +15,7 @@ fn main() {
     cc::Build::new()
         .cpp(true)
         .flag("-std=c++11")
+        .flag("-Wno-return-type-c-linkage")
         .include(format!("{}/include", v8dir))
         .file("./deps/api.cc")
         .warnings(false)

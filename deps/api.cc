@@ -77,8 +77,8 @@ bool
 v8_initialize_platform()
 {
     if (default_platform == nullptr) {
-        default_platform = platform::CreateDefaultPlatform();
-        V8::InitializePlatform(default_platform);
+        std::unique_ptr<Platform> platform = platform::NewDefaultPlatform();
+        V8::InitializePlatform(platform.get());
     }
     return true;
 }
