@@ -706,7 +706,7 @@ v8_function_call(Function **func, Local<Value> global, Local<Value> **argv,
     for (int32_t i = 0; i < argc; i++) {
         args[i] = *argv[i];
     }
-    return (*func)->Call(global, argc, args);
+    return (*func)->Call(context, global, argc, args).ToLocalChecked();
 }
 
 /**
