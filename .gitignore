@@ -7,7 +7,6 @@ deps/*.pyc
 *.mk
 *.pyc
 *.DS_Store
-*.lock
 *.log
 
 config.gypi
