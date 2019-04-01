@@ -27,6 +27,7 @@ fn main() {
 
     cc::Build::new()
         .cpp(true)
+        .flag("-w")
         .flag("-std=c++11")
         .flag(cflags.join(" ").as_str())
         .flag(link_flags.join(" ").as_str())
