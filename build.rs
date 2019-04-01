@@ -1,5 +1,4 @@
 use pkg_config::Library;
-use std::env;
 
 fn main() {
     let Library {
@@ -37,4 +36,5 @@ fn main() {
         .compile("rustjs");
 
     println!("cargo:rerun-if-changed=deps/api.cc");
+    println!("cargo:rerun-if-changed=deps/api.h");
 }
