@@ -1,9 +1,9 @@
 extern crate libc;
 
+use crate::util::config;
+use crate::util::v8;
 use std::env;
 use std::process;
-use util::config;
-use util::v8;
 
 use self::libc::funcs::posix88::unistd;
 

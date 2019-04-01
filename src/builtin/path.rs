@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::path::MAIN_SEPARATOR;
-use util::v8;
+use crate::util::v8;
 
 extern "C" fn normalize(arguments: v8::FunctionCallbackInfo) {
     let p = arguments.At(0).ToString().as_string();

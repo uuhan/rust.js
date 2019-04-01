@@ -4,6 +4,7 @@ version = "0.1.0"
 license = "MIT"
 authors = ["Yorkie Liu <yorkiefixer@gmail.com>"]
 build   = "src/build.rs"
+edition = "2018"
 
 [lib]
 name = "rustjs"
@@ -24,6 +25,7 @@ git = "https://github.com/servo/rust-url"
 
 [build-dependencies]
 cc = "1.0.29"
+pkg-config = "0.3.14"
 
 [[bin]]
 name = "rustjs"

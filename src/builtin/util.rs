@@ -1,5 +1,5 @@
-use builtin::module;
-use util::v8;
+use crate::builtin::module;
+use crate::util::v8;
 
 pub fn Init() -> v8::Object {
     module::LoadBuiltinScript("util")

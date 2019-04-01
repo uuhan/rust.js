@@ -1,6 +1,6 @@
 use std::io::{self, Write};
-use util::v8;
-use util::v8::ValueT;
+use crate::util::v8;
+use crate::util::v8::ValueT;
 
 fn stringify(obj: &v8::Value) -> v8::String {
     let global = v8::Context::Global();

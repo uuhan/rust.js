@@ -2,7 +2,7 @@ extern crate rustc_serialize;
 
 use self::rustc_serialize::base64::{FromBase64, ToBase64, STANDARD};
 use self::rustc_serialize::hex::{FromHex, ToHex};
-use util::v8;
+use crate::util::v8;
 
 enum Encoding {
     ASCII,

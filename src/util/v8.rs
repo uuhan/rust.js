@@ -13,7 +13,7 @@ use std::str;
 
 extern "C" {
     fn v8_free_platform() -> bool;
-    fn v8_initialize_platform() -> bool;
+    fn v8_initialize_platform() -> *mut std::ffi::c_void;
     fn v8_initialize() -> bool;
     fn v8_dispose() -> bool;
     fn v8_set_array_buffer_allocator() -> bool;
@@ -536,8 +536,10 @@ impl Exception {
 pub struct V8(*mut V8);
 impl V8 {
     /// Initialize the v8 platform object
-    pub fn InitializePlatform() -> bool {
-        unsafe { v8_initialize_platform() }
+    pub fn InitializePlatform() {
+        unsafe {
+            v8_initialize_platform();
+        }
     }
     /// Initialize the v8 context
     pub fn Initialize() -> bool {

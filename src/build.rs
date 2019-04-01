@@ -1,38 +1,39 @@
-extern crate cc;
-
+use pkg_config::Library;
 use std::env;
 
 fn main() {
-    let mut v8dir;
-    let mut v8lib;
-    if let Ok(t) = env::var("V8_TARGET") {
-        v8dir = t.clone();
-        v8lib = format!("{}/out.gn/x64.release.sample/obj", v8dir);
-        cc::Build::new()
-            .cpp(true)
-            .flag("-std=c++11")
-            .flag("-Wno-return-type-c-linkage")
-            .include(format!("{}/include", v8dir))
-            .file("./deps/api.cc")
-            .warnings(false)
-            .compile("librustjs.a");
+    let Library {
+        include_paths,
+        link_paths,
+        libs,
+        ..
+    } = pkg_config::Config::new().probe("v8").unwrap();
 
-        println!("cargo:rustc-link-search={}", v8lib);
-        println!("cargo:rustc-link-lib=static=v8_monolith");
-    } else {
-        v8dir = "/usr/local".to_owned();
-        v8lib = format!("{}/lib", v8dir);
-        cc::Build::new()
-            .cpp(true)
-            .flag("-std=c++11")
-            .flag("-Wno-return-type-c-linkage")
-            .include(format!("{}/include", v8dir))
-            .file("./deps/api.cc")
-            .warnings(false)
-            .compile("librustjs.a");
+    let ref cflags: Vec<String> = include_paths
+        .clone()
+        .into_iter()
+        .map(|pathbuf| format!("-I{}", pathbuf.to_str().unwrap()))
+        .collect();
+    let ref link_flags: Vec<String> = link_paths
+        .clone()
+        .into_iter()
+        .map(|pathbuf| format!("-L{}", pathbuf.to_str().unwrap()))
+        .collect();
+    let ref link_libs: Vec<String> = libs
+        .clone()
+        .into_iter()
+        .map(|lib| format!("-l{}", lib))
+        .collect();
 
-        println!("cargo:rustc-link-search={}", v8lib);
-        println!("cargo:rustc-link-lib=static=v8");
-        println!("cargo:rustc-link-lib=static=v8_libplatform");
-    }
+    cc::Build::new()
+        .cpp(true)
+        .flag("-std=c++11")
+        .flag(cflags.join(" ").as_str())
+        .flag(link_flags.join(" ").as_str())
+        .flag(link_libs.join(" ").as_str())
+        .file("./deps/api.cc")
+        .warnings(false)
+        .compile("rustjs");
+
+    println!("cargo:rerun-if-changed=deps/api.cc");
 }

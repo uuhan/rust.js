@@ -15,6 +15,10 @@ extern crate log;
 use util::cmd::Commander;
 use util::v8;
 
+extern "C" {
+    pub fn v8_initialize_platform() -> *mut std::ffi::c_void;
+}
+
 pub fn new_instance() -> i32 {
     extern "C" fn on_locked() {
         v8::with_isolate_scope(&|| {
@@ -78,8 +82,9 @@ pub fn new_instance() -> i32 {
     }
 
     let code: i32 = 1;
-    v8::V8::InitializePlatform();
-    v8::V8::Initialize();
+    let platform = unsafe { v8_initialize_platform() };
+    // v8::V8::InitializePlatform();
+    // v8::V8::Initialize();
     v8::V8::SetArrayBufferAllocator();
     v8::V8::NewIsolate();
     v8::with_locker(on_locked);

@@ -1,6 +1,6 @@
 use std::path::Path;
-use util::v8;
-use util::v8::ValueT;
+use crate::util::v8;
+use crate::util::v8::ValueT;
 
 extern "C" fn require(arguments: v8::FunctionCallbackInfo) {
     let name = arguments.At(0).ToString();

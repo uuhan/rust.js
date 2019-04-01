@@ -1,5 +1,5 @@
 use openssl;
-use util::v8;
+use crate::util::v8;
 
 pub fn Init() -> v8::Object {
     openssl::init();

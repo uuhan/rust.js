@@ -4,9 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "v8.h"
+#include <libplatform/libplatform.h>
+#include <v8.h>
+
 #include "api.h"
-#include "libplatform/libplatform.h"
 
 using namespace v8;
 
@@ -63,8 +64,10 @@ Local<Context> context;
 bool
 v8_free_platform()
 {
-    delete default_platform;
-    default_platform = nullptr;
+    // delete default_platform;
+    // default_platform = nullptr;
+    V8::Dispose();
+    V8::ShutdownPlatform();
     return true;
 }
 
@@ -73,14 +76,13 @@ v8_free_platform()
  * @method v8_initialize_platform
  * @return {bool} always return true
  */
-bool
+std::unique_ptr<Platform>
 v8_initialize_platform()
 {
-    if (default_platform == nullptr) {
-        std::unique_ptr<Platform> platform = platform::NewDefaultPlatform();
-        V8::InitializePlatform(platform.get());
-    }
-    return true;
+    std::unique_ptr<Platform> platform = platform::NewDefaultPlatform();
+    V8::InitializePlatform(platform.get());
+    V8::Initialize();
+    return platform;
 }
 
 /**

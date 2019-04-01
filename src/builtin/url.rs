@@ -1,5 +1,5 @@
 use url::Url;
-use util::v8;
+use crate::util::v8;
 
 extern "C" fn parse(info: v8::FunctionCallbackInfo) {
     let arg = info.At(0).ToString().as_string();

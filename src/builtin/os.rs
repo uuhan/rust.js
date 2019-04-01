@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use std::env;
-use util::v8;
+use crate::util::v8;
 
 extern "C" {
     fn utils_is_big_endian() -> bool;

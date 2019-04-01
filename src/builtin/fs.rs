@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::os::unix::fs::MetadataExt;
 use std::str;
-use util::v8;
+use crate::util::v8;
 
 extern "C" fn rename(info: v8::FunctionCallbackInfo) {
     let oldpath = info.At(0).ToString().as_string();
